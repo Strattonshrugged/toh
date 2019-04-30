@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Hero } from '../hero';
 import { HeroService } from '../hero.service';
-import { Appointment } from '../appointment';
 import { __await } from 'tslib';
 
 @Component({
@@ -12,15 +11,7 @@ import { __await } from 'tslib';
 
 export class AppointmentpageComponent implements OnInit {
   heroes: Hero[] = [];
-  allappointments: Hero[] = [{
-    id: 127,
-    name: 'The Dude',
-    skills: [],
-    appointments: [{
-      date: new Date('11/10/2016,11:49:36AM'),
-      location: 'Mayfield Heights'
-    }]
-    }];
+  allappointments: Hero[] = [];
 
   constructor(private heroService: HeroService) { };
 
@@ -30,34 +21,31 @@ export class AppointmentpageComponent implements OnInit {
 
   getHeroes(): void {
     this.heroService.getHeroes()
-      .subscribe(heroes => this.heroes = heroes);
-
-    // cheap delay tactic until I learn how to promise a call
-
-
-    if (this.heroes.length == 0) {
-      this.UpdateAllAppointments();
-      console.log('heroes length at zero');
-    } else {
-      this.UpdateAllAppointments();
-      console.log('heroes length not at zero');
-    }
+      .subscribe(heroes => {
+        this.heroes = heroes;
+        this.UpdateAllAppointments();
+      });
   }
 
   UpdateAllAppointments(): void {
     // for every hero in heroes ...
     this.heroes.forEach(a => {
       // for every appointment in appointments ...
-      a.appointments.forEach(b => {
-        // push to allappointments an identical hero with just (b) appointment
-        this.allappointments.push(new Hero(a.id, a.name, a.skills, [b]));
-      });
+      if (a.appointments) {
+        a.appointments.forEach(b => {
+          // push to allappointments an identical hero with just (b) appointment
+          this.allappointments.push(new Hero(a.id, a.name, a.skills, [b]));
+        });
+      }
     });
-    // sort allappointments based on date
-    // this.allappointments.sort
+    // sort by date
+    this.allappointments = this.allappointments.sort(
+      (a: Hero, b: Hero) => {
+      if (a.appointments[0].date < b.appointments[0].date) { return -1; }
+      if (a.appointments[0].date > b.appointments[0].date) { return 1; }
+      return 0;
+    });
 
-
-    
   } // end of UpdateAllAppointments
 } // end of AppointmentpageComponent
 
